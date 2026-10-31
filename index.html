@@ -1,284 +1,518 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Zeno</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:      #070707;
-      --surface: #101010;
-      --border:  #1c1c1c;
-      --white:   #f5f5f5;
-      --muted:   #3d3d3d;
-      --faint:   #222222;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#070707">
+    <meta name="description" content="Zeno — A lightweight Windows utility, built for speed.">
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <title>Zeno — Windows Utility</title>
 
-    html, body {
-      height: 100%;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    body {
-      background: var(--bg);
-      color: var(--white);
-      font-family: 'Inter', system-ui, sans-serif;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      min-height: 100%;
-      overflow-x: hidden;
-    }
+    <style>
+        :root {
+            --bg: #070707;
+            --surface: #101010;
+            --surface-hover: #151515;
+            --border: #202020;
+            --white: #f5f5f5;
+            --muted: #686868;
+            --accent: #ffffff;
+        }
 
-    /* ── Grain texture ── */
-    .grain {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 900;
-      opacity: 0.048;
-      filter: url(#grain-svg);
-      background: white;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* ── Background glow ── */
-    .bg-glow {
-      position: fixed;
-      top: -20vh;
-      left: 50%;
-      translate: -50% 0;
-      width: 560px;
-      height: 560px;
-      background: radial-gradient(circle, rgba(255,255,255,0.065) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-      animation: pulse 9s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity: .55; scale: 1;    }
-      50%      { opacity: 1;   scale: 1.08; }
-    }
+        html {
+            scroll-behavior: smooth;
+        }
 
-    /* ── Header ── */
-    header {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 26px 44px;
-      border-bottom: 1px solid var(--border);
-    }
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
 
-    .logo {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--white);
-      letter-spacing: -.01em;
-    }
+        /* Background */
 
-    .vtag {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 10px;
-      letter-spacing: .04em;
-    }
+        .background {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
 
-    /* ── Main / Hero ── */
-    main {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 24px;
-    }
+        .glow {
+            position: absolute;
+            width: 750px;
+            height: 750px;
+            top: -480px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(
+                circle,
+                rgba(255,255,255,0.12) 0%,
+                rgba(255,255,255,0.035) 35%,
+                transparent 70%
+            );
+            animation: glowPulse 9s ease-in-out infinite;
+        }
 
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      animation: rise .65s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-    @keyframes rise {
-      from { opacity: 0; translate: 0 18px; }
-      to   { opacity: 1; translate: 0 0; }
-    }
+        @keyframes glowPulse {
+            0%, 100% { opacity: .55; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+        }
 
-    h1 {
-      font-size: clamp(64px, 12vw, 108px);
-      font-weight: 700;
-      letter-spacing: -.05em;
-      line-height: 1;
-      color: #ffffff;
-      margin-bottom: 22px;
-    }
+        .grain {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
+            opacity: .035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+        }
 
-    .subtitle {
-      font-size: 14px;
-      font-weight: 300;
-      color: var(--muted);
-      letter-spacing: .01em;
-      line-height: 1.7;
-      max-width: 280px;
-      margin-bottom: 52px;
-    }
+        /* Header */
 
-    /* ── Download button ── */
-    .dl-btn {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 13px 30px;
-      background: var(--white);
-      color: #080808;
-      font-family: inherit;
-      font-size: 13.5px;
-      font-weight: 600;
-      text-decoration: none;
-      border-radius: 999px;
-      overflow: hidden;
-      transition: background .2s, translate .15s ease, box-shadow .2s;
-      box-shadow: 0 2px 16px rgba(255,255,255,0.07);
-    }
+        header {
+            position: relative;
+            z-index: 2;
+            height: 76px;
+            padding: 0 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+        }
 
-    /* shimmer sweep */
-    .dl-btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        112deg,
-        transparent 33%,
-        rgba(0,0,0,0.07) 50%,
-        transparent 67%
-      );
-      translate: -130% 0;
-    }
-    .dl-btn:hover {
-      background: #e9e9e9;
-      translate: 0 -2px;
-      box-shadow:
-        0 0 0 6px rgba(255,255,255,0.06),
-        0 6px 28px rgba(255,255,255,0.11);
-    }
-    .dl-btn:hover::after {
-      translate: 130% 0;
-      transition: translate .5s ease;
-    }
-    .dl-btn:active {
-      translate: 0 0;
-      transition-duration: .07s;
-    }
+        .logo {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -.7px;
+        }
 
-    .win-icon {
-      width: 15px;
-      height: 15px;
-      opacity: .65;
-      flex-shrink: 0;
-    }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
 
-    /* ── File meta ── */
-    .meta {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-top: 22px;
-      font-size: 11px;
-      font-weight: 400;
-      color: var(--muted);
-      letter-spacing: .03em;
-    }
-    .meta-line {
-      width: 1px;
-      height: 11px;
-      background: var(--faint);
-    }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #777;
+        }
 
-    /* ── Footer ── */
-    footer {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 44px;
-      border-top: 1px solid var(--border);
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: .02em;
-    }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #75d69b;
+            box-shadow: 0 0 10px rgba(117,214,155,.5);
+        }
 
-    /* ── Reduced motion ── */
-    @media (prefers-reduced-motion: reduce) {
-      .hero           { animation: none; }
-      .bg-glow        { animation: none; }
-      .dl-btn::after  { display: none;   }
-    }
+        .version {
+            border: 1px solid var(--border);
+            background: #101010;
+            border-radius: 6px;
+            padding: 6px 11px;
+            color: #999;
+            font-size: 11px;
+            font-weight: 500;
+        }
 
-    @media (max-width: 500px) {
-      header, footer { padding: 20px 24px; }
-    }
-  </style>
+        /* Main */
+
+        main {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 90px 20px;
+        }
+
+        .hero {
+            width: 100%;
+            max-width: 560px;
+            text-align: center;
+            animation: appear .8s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 8px 13px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.025);
+            border-radius: 999px;
+            color: #888;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: .04em;
+            margin-bottom: 28px;
+        }
+
+        .eyebrow-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        h1 {
+            font-size: clamp(76px, 15vw, 120px);
+            font-weight: 800;
+            letter-spacing: -.085em;
+            line-height: .95;
+            margin-bottom: 25px;
+            background: linear-gradient(180deg, #fff 30%, #858585 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            color: #777;
+            font-size: 14px;
+            font-weight: 300;
+            line-height: 1.9;
+            max-width: 310px;
+            margin: 0 auto 43px;
+        }
+
+        /* Download card */
+
+        .download-card {
+            max-width: 390px;
+            margin: 0 auto;
+            padding: 22px;
+            border: 1px solid #242424;
+            border-radius: 15px;
+            background: linear-gradient(
+                145deg,
+                rgba(255,255,255,.045),
+                rgba(255,255,255,.012)
+            );
+            box-shadow: 0 20px 80px rgba(0,0,0,.3);
+            transition: border-color .25s, transform .25s;
+        }
+
+        .download-card:hover {
+            border-color: #383838;
+            transform: translateY(-3px);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .file-icon {
+            width: 43px;
+            height: 43px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: #1c1c1c;
+            border: 1px solid #303030;
+            flex-shrink: 0;
+        }
+
+        .file-icon svg {
+            width: 21px;
+            height: 21px;
+        }
+
+        .file-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .file-details {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .dl-btn {
+            width: 100%;
+            min-height: 49px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #f5f5f5;
+            color: #080808;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            transition: .2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dl-btn:hover {
+            background: #dedede;
+            box-shadow: 0 0 30px rgba(255,255,255,.09);
+            transform: translateY(-1px);
+        }
+
+        .dl-btn:active {
+            transform: scale(.985);
+        }
+
+        .dl-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 13px;
+            margin-top: 19px;
+            font-size: 10px;
+            color: #626262;
+        }
+
+        .meta span:not(.separator) {
+            white-space: nowrap;
+        }
+
+        .separator {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #444;
+        }
+
+        /* Features */
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 35px;
+            margin-top: 65px;
+        }
+
+        .feature {
+            text-align: center;
+        }
+
+        .feature-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+
+        .feature-description {
+            font-size: 10px;
+            color: #555;
+        }
+
+        /* Footer */
+
+        footer {
+            position: relative;
+            z-index: 2;
+            min-height: 65px;
+            padding: 20px 7%;
+            border-top: 1px solid rgba(255,255,255,.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #555;
+            font-size: 10px;
+        }
+
+        .footer-brand {
+            color: #888;
+            font-weight: 600;
+        }
+
+        .footer-right {
+            letter-spacing: .02em;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 600px) {
+            header {
+                height: 68px;
+                padding: 0 22px;
+            }
+
+            main {
+                padding: 75px 20px;
+            }
+
+            h1 {
+                font-size: 85px;
+            }
+
+            .features {
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+
+            footer {
+                padding: 20px 22px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-  <!-- Grain filter -->
-  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
-    <filter id="grain-svg">
-      <feTurbulence type="fractalNoise" baseFrequency="0.78" numOctaves="4" stitchTiles="stitch"/>
-      <feColorMatrix type="saturate" values="0"/>
-    </filter>
-  </svg>
-  <div class="grain" aria-hidden="true"></div>
-
-  <div class="bg-glow" aria-hidden="true"></div>
-
-  <header>
-    <span class="logo">Zeno</span>
-    <span class="vtag">v1.0</span>
-  </header>
-
-  <main>
-    <div class="hero">
-      <h1>Zeno</h1>
-
-      <p class="subtitle">A lightweight Windows utility,<br>built for speed.</p>
-
-      <a class="dl-btn"
-         href="https://github.com/zeno1011/zeno1011-github.io/releases/download/v1.0/rat.exe"
-         download>
-        <svg class="win-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M0 3.449L9.75 2.1v9.45H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
-        </svg>
-        Download for Windows
-      </a>
-
-      <div class="meta">
-        <span>Version 1.0</span>
-        <span class="meta-line"></span>
-        <span>Windows 10 / 11</span>
-        <span class="meta-line"></span>
-        <span>Free</span>
-      </div>
+    <div class="background">
+        <div class="glow"></div>
     </div>
-  </main>
 
-  <footer>
-    © 2026 Zeno
-  </footer>
+    <div class="grain"></div>
+
+    <header>
+        <span class="logo">Zeno.</span>
+
+        <div class="header-right">
+            <div class="status">
+                <span class="status-dot"></span>
+                Latest release
+            </div>
+            <span class="version">v1.1</span>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+
+            <div class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                SIMPLE. LIGHTWEIGHT. FAST.
+            </div>
+
+            <h1>Zeno</h1>
+
+            <p class="subtitle">
+                A lightweight Windows utility,
+                built for speed and simplicity.
+            </p>
+
+            <div class="download-card">
+
+                <div class="file-info">
+
+                    <div class="file-icon">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="white" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="3" width="16" height="18" rx="3"/>
+                            <path d="M8 8h8M8 12h8M8 16h4"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div class="file-name">Zeno for Windows</div>
+                        <div class="file-details">client.exe · Version 1.1</div>
+                    </div>
+
+                </div>
+
+                <a class="dl-btn"
+                   href="https://github.com/zeno1011/zeno1011-github.io/releases/download/v1.1/client.exe"
+                   download>
+
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <path d="m7 10 5 5 5-5"/>
+                        <path d="M12 15V3"/>
+                    </svg>
+
+                    Download for Windows
+
+                </a>
+
+                <div class="meta">
+                    <span>Version 1.1</span>
+                    <span class="separator"></span>
+                    <span>Windows 10 / 11</span>
+                    <span class="separator"></span>
+                    <span>Free</span>
+                </div>
+
+            </div>
+
+            <div class="features">
+
+                <div class="feature">
+                    <div class="feature-title">Lightweight</div>
+                    <div class="feature-description">Minimal overhead</div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-title">Simple</div>
+                    <div class="feature-description">Straightforward design</div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-title">Windows</div>
+                    <div class="feature-description">Windows 10 & 11</div>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <footer>
+        <span class="footer-brand">Zeno.</span>
+        <span class="footer-right">© 2026 Zeno. All rights reserved.</span>
+    </footer>
 
 </body>
 </html>
+```
